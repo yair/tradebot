@@ -10,11 +10,11 @@ var crypto = require('crypto'),
 // BUG : add minimum order size. Also, low orders are not cancelled.
 // TODO : snipe low asks
 
-const   gap = 0.0000000011,	// 0.1 sat + epsilon
+var     gap = 0.0000000011,	// 0.1 sat + epsilon
 //	min_btc = 0.001,
-        max_btc = 0.000723,
+        max_btc = 0.001723,
         volume_prec = 0.0001,
-        max_price=0.00000015, // 15 sats
+        max_price=0.00000032, // 22 sats
         dist_from_bottom_ask = 0.00000001, // 1 sats
         ignore_my_asks = true,
         golden_ratio = 1.61803398875;
@@ -241,7 +241,16 @@ function send_authed_buy_cmd(cmd, price, volume, tonce, func) {
 
 console.log('payload=' + payload);
 console.log('hash=' + hash);
-
+    var form = {
+				access_key: graviex_access_key,
+				market: 'mixbtc',
+				side: 'buy',
+				volume: volume,
+				price: price,
+				tonce: tonce,
+				signature: hash
+			};
+    console.log ('form: ' + JSON.stringify (form));
 	request ({
 			url: req,
 			method: 'POST',
@@ -338,7 +347,11 @@ function send_authed_get_cmd(cmd, params, func) {
 		//console.log('Response: ' + resp);
 		//console.log('Body: ' + JSON.stringify(JSON.parse(body), null, 2));
 
-		if (func!=null) func(JSON.parse(body));
+        try {
+    		if (func!=null) func(JSON.parse(body));
+        } catch (err) {
+            throw ('send_authed_get_cmd:\nbody=' + body + '\ncmd=' + cmd + '\nerr=' + err);
+        }
 	});
 }
 
